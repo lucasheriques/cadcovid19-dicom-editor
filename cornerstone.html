@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<!-- PARTE CRIADA APENAS PARA TESTES -->
+<!-- INICIO-->
+<html>
+  <head>
+    <!-- Bootsrap só para ficar visualmente agradável -->
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <link
+      href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@tailwindcss/ui@latest/dist/tailwind-ui.min.css"
+    />
+    <style>
+      html {
+        font-family: "Inter";
+      }
+
+      input[type="file"] {
+        display: none;
+      }
+
+      [x-cloak] {
+        display: none;
+      }
+    </style>
+    <link
+      href="node_modules/cornerstone-core/dist/cornerstone.min.css"
+      rel="stylesheet"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"
+      defer
+    ></script>
+  </head>
+  <!-- página simples para demonstrar o exemplo -->
+  <!-- INICIO -->
+  <body>
+    <div
+      id="mainContainer"
+      class="min-h-screen flex flex-col bg-gray-900 text-white"
+      x-data="{ uploadedImage: false, interpolationStatus: false }"
+    >
+      <div
+        id="title"
+        class="py-4 text-center"
+        style="background-color: #1d1d1d"
+      >
+        <h1 class="text-md">DICOM Editor</h1>
+      </div>
+      <div id="basic-tools" class="flex flex-wrap text-center">
+        <button
+          id="zoomIn"
+          type="button"
+          :disabled="uploadedImage === false"
+          :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
+          class="flex-1 justify-center inline-flex items-center px-3 py-2 border border-black text-sm leading-4 font-medium text-white bg-gray-600 hover:bg-gray-500 focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700 transition ease-in-out duration-150"
+          @click="zoomIn()"
+        >
+          <i class="material-icons text-md mr-2">zoom_in</i>
+          Zoom In
+        </button>
+        <button
+          id="zoomOut"
+          type="button"
+          :disabled="uploadedImage === false"
+          :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
+          class="flex-1 justify-center inline-flex items-center px-3 py-2 border border-black text-sm leading-4 font-medium text-white bg-gray-600 hover:bg-gray-500 focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700 transition ease-in-out duration-150"
+          @click="zoomOut()"
+        >
+          <i class="material-icons text-md mr-2">zoom_out</i>
+          Zoom Out
+        </button>
+        <button
+          id="invert"
+          type="button"
+          :disabled="uploadedImage === false"
+          :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
+          class="flex-1 justify-center inline-flex items-center px-3 py-2 border border-black text-sm leading-4 font-medium text-white bg-gray-600 hover:bg-gray-500 focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700 transition ease-in-out duration-150"
+          @click="invertColors()"
+        >
+          <i class="material-icons text-md mr-2">invert_colors</i>
+          Invert
+        </button>
+        <button
+          type="button"
+          :disabled="uploadedImage === false"
+          :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
+          class="flex-1 justify-center inline-flex items-center px-3 py-2 border border-black text-sm leading-4 font-medium text-white bg-gray-600 hover:bg-gray-500 focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700 transition ease-in-out duration-150"
+          @click="interpolation(); interpolationStatus=!interpolationStatus"
+        >
+          <i
+            class="material-icons text-md mr-2"
+            x-text="interpolationStatus ? 'toggle_on' : 'toggle_off'"
+          ></i>
+          Toggle Interpolation
+        </button>
+        <button
+          id="hflip"
+          type="button"
+          :disabled="uploadedImage === false"
+          :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
+          class="flex-1 justify-center inline-flex items-center px-3 py-2 border border-black text-sm leading-4 font-medium text-white bg-gray-600 hover:bg-gray-500 focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700 transition ease-in-out duration-150"
+          @click="horizontalFlip()"
+        >
+          <i class="material-icons text-md mr-2">flip</i>
+          Horizontal Flip
+        </button>
+        <button
+          id="vflip"
+          type="button"
+          :disabled="uploadedImage === false"
+          :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
+          class="flex-1 justify-center inline-flex items-center px-3 py-2 border border-black text-sm leading-4 font-medium text-white bg-gray-600 hover:bg-gray-500 focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700 transition ease-in-out duration-150"
+          @click="verticalFlip()"
+        >
+          <i class="material-icons text-md mr-2">swap_vert</i>
+          Vertical Flip
+        </button>
+        <button
+          id="rotate"
+          type="button"
+          :disabled="uploadedImage === false"
+          :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
+          class="flex-1 justify-center inline-flex items-center px-3 py-2 border border-black text-sm leading-4 font-medium text-white bg-gray-600 hover:bg-gray-500 focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700 transition ease-in-out duration-150"
+          @click="rotate()"
+        >
+          <i class="material-icons text-md mr-2">rotate_90_degrees_ccw</i>
+          Rotate 90°
+        </button>
+        <button
+          id="reset"
+          type="button"
+          :disabled="uploadedImage === false"
+          :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
+          class="flex-1 justify-center inline-flex items-center px-3 py-2 border border-black text-sm leading-4 font-medium text-white bg-gray-600 hover:bg-gray-500 focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700 transition ease-in-out duration-150"
+          @click="reset()"
+        >
+          <i class="material-icons text-md mr-2">restore</i>
+          Reset
+        </button>
+      </div>
+      <div id="editor" class="flex-auto flex flex-col justify-around">
+        <div class="text-center">
+          <div class="page-header">
+            <h1>
+              Exemplo de como abrir uma DICOM P10 a partir de um arquivo local
+            </h1>
+            <p class="lead">
+              Segurando o botão esquerdo do mouse e arrastando para algum dos
+              lados move a imagem. <br />
+            </p>
+          </div>
+        </div>
+
+        <!-- INICIO BOTAO ARQUIVO-->
+        <div id="loadImage" class="text-center mx-auto">
+          <div
+            class="flex justify-center items-center border-2 border-gray-300 border-dashed rounded-md"
+            style="height: 512px; width: 512px"
+            id="uploadContainer"
+            @dragover.prevent="$event.dataTransfer.dropEffect = 'copy'"
+            @drop.prevent="handleFileSelect($event.dataTransfer.files); uploadedImage = true"
+            x-show="uploadedImage === false"
+          >
+            <div class="text-center">
+              <svg
+                class="mx-auto h-12 w-12 text-gray-400"
+                stroke="currentColor"
+                fill="none"
+                viewBox="0 0 48 48"
+              >
+                <path
+                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <label
+                for="selectFile"
+                class="font-medium text-gray-300 hover:text-gray-50 focus:outline-none focus:underline transition duration-150 ease-in-out"
+              >
+                Upload a file
+              </label>
+              <input
+                type="file"
+                id="selectFile"
+                class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline transition duration-150 ease-in-out"
+                @change="handleFileSelect($event.target.files); uploadedImage = true"
+              />
+              <p class="mt-1 text-sm text-gray-400">or drag and drop</p>
+              <p class="mt-1 text-xs text-gray-500">DCM up to 10MB</p>
+            </div>
+          </div>
+          <!-- FIM BOTAO ARQUIVO-->
+
+          <!-- INICIO VIEWPORT -->
+          <!-- Seleciona a área da imagem-->
+
+          <!-- Seleciona o tamanho da imagem -->
+          <div
+            id="dicomImage"
+            style="width: 512px; height: 512px"
+            x-show="uploadedImage === true"
+          ></div>
+        </div>
+        <!-- FIM VIEWPORT -->
+        <!-- INICIO SLIDER -->
+        <div class="mt-4 text-center">
+          <label>Window Width</label>
+          <input
+            type="range"
+            min="1"
+            max="1024"
+            value="256"
+            class="slider"
+            :disabled="uploadedImage === false"
+            :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
+            id="windowWidthSlider"
+          />
+          Value: <span id="wws"></span>
+          <label>Window Center</label>
+          <input
+            type="range"
+            min="1"
+            max="768"
+            value="128"
+            class="slider"
+            :disabled="uploadedImage === false"
+            :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
+            id="windowCenterSlider"
+          />
+          Value: <span id="wcs"></span>
+        </div>
+        <!-- FIM SLIDER -->
+      </div>
+      <!-- INICIO BOTOES -->
+      <div
+        id="anotations"
+        class="py-4 text-center"
+        style="background-color: #1d1d1d"
+      >
+        WIP: Anotations Tools (vamos colocar as ferramentas de anotações ainda,
+        talvez aqui, em um dropdown)
+      </div>
+    </div>
+    <!-- FIM BOTOES -->
+  </body>
+
+  <!-- PARTE CRIADA APENAS PARA TESTES-->
+  <!-- FIM -->
+
+  <!-- BIBLIOTECAS -->
+
+  <!-- Cornerstone library -->
+  <script src="cornerstone-lib/cornerstone.js"></script>
+
+  <!-- dicomParser library (Dependencia do WADO para conseguir abrir uma DICOM) -->
+  <script src="cornerstone-lib/dicomParser.js"></script>
+
+  <!-- CornerstoneWADOImageLoader library -->
+  <script src="cornerstone-lib/cornerstoneWADOImageLoader.js"></script>
+
+  <!-- BIBLIOTECAS -->
+
+  <!-- A PARTIR DAQUI VEM A PARTE QUE REALMENTE IMPORTA -->
+  <script>
+    //FAZENDO A CORNERSTONERWADO CARREGAR A CORNERSTONE
+    cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
+
+    // FUNCAO QUE (BASEADA NO EXEMPLO, PODENDO MUDAR O NOME DO ELEMENTO) HABILITA O ELEMENTO
+    // DA IMAGEM PARA QUE POSSA SER ACESSADO PELA BIBLIOTECA E SER VISUALIZADO
+    const element = document.getElementById("dicomImage");
+    cornerstone.enable(element);
+
+    // TODAS AS FUNÇÕES RELACIONADAS AO UPLOAD:
+
+    // Essa função é chamada quando o usuario escolhe o arquivo
+    function handleFileSelect(files) {
+      // Essa Interface só da conta de abrir um único arquivo, portanto se outros forem selecionados, ele pega
+      // o primeiro e descarta o resto
+      file = files[0];
+      const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file);
+      loadAndViewImage(imageId);
+    }
+
+    // Função criada só para mostrar para o usúsario, caso ele arraste uma imagem, que está sendo criada uma
+    // cópia
+    function handleDragOver(evt) {
+      evt.dataTransfer.dropEffect = "copy";
+    }
+
+    //FUNCAO PARA LER O ARQUIVO DICOM E ADICIONA-LO NO VIEWPORT SEM AS MANIPULACOES
+    function loadAndViewImage(imageId) {
+      const element = document.getElementById("dicomImage");
+      const start = new Date().getTime();
+      cornerstone.loadImage(imageId).then(
+        function (image) {
+          const viewport = cornerstone.getDefaultViewportForImage(
+            element,
+            image
+          );
+          cornerstone.displayImage(element, image, viewport);
+        },
+        function (err) {
+          alert(err);
+        }
+      );
+    }
+
+    // FIM FUNÇÕES UPLOAD
+
+    // CRIA AS VARIAVEIS PARA PEGAR O VALOR DO SLIDER (WINDOW WIDTH) E EXIBIR PARA O USUARIO
+    var sliderWW = document.getElementById("windowWidthSlider");
+    var outputWW = document.getElementById("wws");
+    outputWW.innerHTML = sliderWW.value;
+    // FUNCAO PARA ATUALIZAR O VALOR DO SLIDER (WINDOW WIDTH)
+    sliderWW.oninput = function () {
+      outputWW.innerHTML = this.value;
+      let viewport = cornerstone.getViewport(element);
+      // PARTE REALMENTE RESPONSAVEL PELO WINDOWING //
+      viewport.voi.windowWidth = parseFloat(this.value);
+      cornerstone.setViewport(element, viewport);
+    };
+
+    // CRIA AS VARIAVEIS PARA PEGAR O VALOR DO SLIDER (WINDOW CENTER) E EXIBIR PARA O USUARIO
+    var sliderWC = document.getElementById("windowCenterSlider");
+    var outputWC = document.getElementById("wcs");
+    outputWC.innerHTML = sliderWC.value;
+    // FUNCAO PARA ATUALIZAR O VALOR DO SLIDER (WINDOW CENTER)
+    sliderWC.oninput = function () {
+      outputWC.innerHTML = this.value;
+      let viewport = cornerstone.getViewport(element);
+      // PARTE REALMENTE RESPONSAVEL PELO WINDOWING //
+      viewport.voi.windowCenter = parseFloat(this.value);
+      cornerstone.setViewport(element, viewport);
+    };
+
+    // TODAS AS FUNÇÕES DOS BOTÕES BÁSICOS (MENU SUPERIOR)
+
+    function invertColors() {
+      let viewport = cornerstone.getViewport(element);
+      // PARTE REALMENTE RESPONSAVEL PELO INVERT //
+      viewport.invert = !viewport.invert;
+      // PARTE REALMENTE RESPONSAVEL PELO WINDOWING //
+      cornerstone.setViewport(element, viewport);
+    }
+
+    function interpolation() {
+      let viewport = cornerstone.getViewport(element);
+      // PARTE REALMENTE RESPONSAVEL PELA INTERPOLACAO //
+      viewport.pixelReplication = !viewport.pixelReplication;
+      // PARTE REALMENTE RESPONSAVEL PELA INTERPOLACAO //
+      cornerstone.setViewport(element, viewport);
+    }
+
+    function zoomIn() {
+      const viewport = cornerstone.getViewport(element);
+      // PARTE REALMENTE RESPONSAVEL PELO ZOOM //
+      viewport.scale += 0.25;
+      // PARTE REALMENTE RESPONSAVEL PELO ZOOM //
+      cornerstone.setViewport(element, viewport);
+    }
+
+    function zoomOut() {
+      const viewport = cornerstone.getViewport(element);
+      // PARTE REALMENTE RESPONSAVEL POR REMOVER O ZOOM //
+      viewport.scale -= 0.25;
+      // PARTE REALMENTE RESPONSAVEL POR REMOVER O ZOOM //
+      cornerstone.setViewport(element, viewport);
+    }
+
+    function horizontalFlip() {
+      const viewport = cornerstone.getViewport(element);
+      // PARTE REALMENTE RESPONSAVEL POR ESPELHAR A IMAGEM //
+      viewport.hflip = !viewport.hflip;
+      // PARTE REALMENTE RESPONSAVEL POR ESPELHAR A IMAGEM //
+      cornerstone.setViewport(element, viewport);
+    }
+
+    function verticalFlip() {
+      const viewport = cornerstone.getViewport(element);
+      // PARTE REALMENTE RESPONSAVEL POR ESPELHAR A IMAGEM //
+      viewport.vflip = !viewport.vflip;
+      // PARTE REALMENTE RESPONSAVEL POR ESPELHAR A IMAGEM //
+      cornerstone.setViewport(element, viewport);
+    }
+
+    function rotate() {
+      const viewport = cornerstone.getViewport(element);
+      // PARTE REALMENTE RESPONSAVEL POR ROTACIONAR A IMAGEM //
+      viewport.rotation += 90;
+      // PARTE REALMENTE RESPONSAVEL POR ROTACIONAR A IMAGEM //
+      cornerstone.setViewport(element, viewport);
+    }
+
+    function reset() {
+      cornerstone.reset(element);
+    }
+
+    // FIM FUNÇÕES BUTÕES BÁSICOS
+
+    // FUNCAO RESPONSAVEL POR PEGAR UMA ENTRADA DO MOUSE E MOVER A IMAGEM (PAN)
+    element.addEventListener("mousedown", function (e) {
+      let lastX = e.pageX;
+      let lastY = e.pageY;
+
+      function mouseMoveHandler(e) {
+        const deltaX = e.pageX - lastX;
+        const deltaY = e.pageY - lastY;
+        lastX = e.pageX;
+        lastY = e.pageY;
+
+        const viewport = cornerstone.getViewport(element);
+        // PARTE REALMENTE RESPONSAVEL POR MOVER A IMAGEM //
+        viewport.translation.x += deltaX / viewport.scale;
+        viewport.translation.y += deltaY / viewport.scale;
+        // PARTE REALMENTE RESPONSAVEL POR MOVER A IMAGEM //
+        cornerstone.setViewport(element, viewport);
+      }
+
+      function mouseUpHandler() {
+        document.removeEventListener("mousemove", mouseMoveHandler);
+        document.removeEventListener("mouseup", mouseUpHandler);
+      }
+
+      document.addEventListener("mousemove", mouseMoveHandler);
+      document.addEventListener("mouseup", mouseUpHandler);
+    });
+  </script>
+</html>
