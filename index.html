@@ -46,7 +46,7 @@
     <div
       id="mainContainer"
       class="min-h-screen flex flex-col bg-gray-900 text-white"
-      x-data="{ uploadedImage: false, interpolationStatus: false }"
+      x-data="{ uploadedImage: false, interpolationStatus: false, windowWidth: 256, windowCenter: 128 }"
     >
       <div
         id="title"
@@ -227,8 +227,10 @@
             :disabled="uploadedImage === false"
             :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
             id="windowWidthSlider"
+            x-model="windowWidth"
+            @input="setWindowWidth(windowWidth)"
           />
-          Value: <span id="wws"></span>
+          Value: <span id="wws" x-text="windowWidth"></span>
           <label>Window Center</label>
           <input
             type="range"
@@ -239,8 +241,10 @@
             :disabled="uploadedImage === false"
             :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
             id="windowCenterSlider"
+            x-model="windowCenter"
+            @input="setWindowCenter(windowCenter)"
           />
-          Value: <span id="wcs"></span>
+          Value: <span id="wcs" x-text="windowCenter"></span>
         </div>
         <!-- FIM SLIDER -->
       </div>
@@ -329,31 +333,19 @@
 
     // FIM FUNÇÕES UPLOAD
 
-    // CRIA AS VARIAVEIS PARA PEGAR O VALOR DO SLIDER (WINDOW WIDTH) E EXIBIR PARA O USUARIO
-    var sliderWW = document.getElementById("windowWidthSlider");
-    var outputWW = document.getElementById("wws");
-    outputWW.innerHTML = sliderWW.value;
-    // FUNCAO PARA ATUALIZAR O VALOR DO SLIDER (WINDOW WIDTH)
-    sliderWW.oninput = function () {
-      outputWW.innerHTML = this.value;
+    function setWindowWidth(value) {
       let viewport = cornerstone.getViewport(element);
       // PARTE REALMENTE RESPONSAVEL PELO WINDOWING //
-      viewport.voi.windowWidth = parseFloat(this.value);
+      viewport.voi.windowWidth = parseFloat(value);
       cornerstone.setViewport(element, viewport);
-    };
+    }
 
-    // CRIA AS VARIAVEIS PARA PEGAR O VALOR DO SLIDER (WINDOW CENTER) E EXIBIR PARA O USUARIO
-    var sliderWC = document.getElementById("windowCenterSlider");
-    var outputWC = document.getElementById("wcs");
-    outputWC.innerHTML = sliderWC.value;
-    // FUNCAO PARA ATUALIZAR O VALOR DO SLIDER (WINDOW CENTER)
-    sliderWC.oninput = function () {
-      outputWC.innerHTML = this.value;
+    function setWindowCenter(value) {
       let viewport = cornerstone.getViewport(element);
       // PARTE REALMENTE RESPONSAVEL PELO WINDOWING //
-      viewport.voi.windowCenter = parseFloat(this.value);
+      viewport.voi.windowCenter = parseFloat(value);
       cornerstone.setViewport(element, viewport);
-    };
+    }
 
     // TODAS AS FUNÇÕES DOS BOTÕES BÁSICOS (MENU SUPERIOR)
 
