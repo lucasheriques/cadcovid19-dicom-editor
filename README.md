@@ -4,6 +4,8 @@ This project is about creating a DICOM editor to be used on the [CADCOVID-19](ht
 
 Its goal is to help physicians view DICOM images online, and also perform annotations on the images. (WIP)
 
+You can access it [here](https://lucasheriques.github.io/cadcovid19-dicom-editor/).
+
 ## Technologies used
 
 - [Tailwind CSS](https://tailwindcss.com/)
