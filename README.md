@@ -1,6 +1,6 @@
 # CADCOVID-19 DICOM editor
 
-This project is about creating a DICOM editor to be used on the (CADCOVID-19)[https://cadcovid19.surge.sh/] project.
+This project is about creating a DICOM editor to be used on the [CADCOVID-19](https://cadcovid19.surge.sh/) project.
 
 Its goal is to help physicians view DICOM images online, and also perform annotations on the images. (WIP)
 
