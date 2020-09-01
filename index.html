@@ -42,11 +42,12 @@
   </head>
   <!-- página simples para demonstrar o exemplo -->
   <!-- INICIO -->
+
   <body>
     <div
       id="mainContainer"
       class="min-h-screen flex flex-col bg-gray-900 text-white"
-      x-data="{ uploadedImage: false, interpolationStatus: false, windowWidth: 256, windowCenter: 128 }"
+      x-data="{ uploadedImage: false, interpolationStatus: false, windowWidth: 256, windowCenter: 128, showHistogram: false }"
     >
       <div
         id="title"
@@ -57,26 +58,37 @@
       </div>
       <div id="basic-tools" class="flex flex-wrap text-center">
         <button
-          id="zoomIn"
+          id="pan"
           type="button"
           :disabled="uploadedImage === false"
           :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
           class="flex-1 justify-center inline-flex items-center px-3 py-2 border border-black text-sm leading-4 font-medium text-white bg-gray-600 hover:bg-gray-500 focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700 transition ease-in-out duration-150"
-          @click="zoomIn()"
+          @click="pan()"
         >
-          <i class="material-icons text-md mr-2">zoom_in</i>
-          Zoom In
+          <i class="material-icons text-md mr-2">pan_tool</i>
+          Pan
         </button>
         <button
-          id="zoomOut"
+          id="wwwcTool"
           type="button"
           :disabled="uploadedImage === false"
           :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
           class="flex-1 justify-center inline-flex items-center px-3 py-2 border border-black text-sm leading-4 font-medium text-white bg-gray-600 hover:bg-gray-500 focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700 transition ease-in-out duration-150"
-          @click="zoomOut()"
+          @click="wwwcTools()"
         >
-          <i class="material-icons text-md mr-2">zoom_out</i>
-          Zoom Out
+          <i class="material-icons text-md mr-2">filter_b_and_w</i>
+          WWWC
+        </button>
+        <button
+          id="wwwcRegion"
+          type="button"
+          :disabled="uploadedImage === false"
+          :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
+          class="flex-1 justify-center inline-flex items-center px-3 py-2 border border-black text-sm leading-4 font-medium text-white bg-gray-600 hover:bg-gray-500 focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700 transition ease-in-out duration-150"
+          @click="wwwcRegionTools()"
+        >
+          <i class="material-icons text-md mr-2">filter_b_and_w</i>
+          WWWCRegion
         </button>
         <button
           id="invert"
@@ -146,10 +158,21 @@
           <i class="material-icons text-md mr-2">restore</i>
           Reset
         </button>
+        <button
+          id="reset"
+          type="button"
+          :disabled="uploadedImage === false"
+          :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
+          class="flex-1 justify-center inline-flex items-center px-3 py-2 border border-black text-sm leading-4 font-medium text-white bg-gray-600 hover:bg-gray-500 focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700 transition ease-in-out duration-150"
+          @click="histogram(); showHistogram = !showHistogram"
+        >
+          <i class="material-icons text-md mr-2">analytics</i>
+          Histograma
+        </button>
       </div>
       <div
         id="editor"
-        class="flex-auto flex flex-col justify-around text-center"
+        class="flex-auto flex flex-col justify-evenly text-center"
       >
         <p>
           Showcasing how to open a DICOM P10 file from a local file.<br />
@@ -208,45 +231,22 @@
           <!-- Seleciona a área da imagem-->
 
           <!-- Seleciona o tamanho da imagem -->
-          <div
-            id="dicomImage"
-            style="width: 512px; height: 512px"
-            x-show="uploadedImage === true"
-          ></div>
+          <div class="flex items-center">
+            <div
+              id="dicomImage"
+              style="width: 512px; height: 512px"
+              x-show="uploadedImage === true"
+            ></div>
+            <div
+              id="histograma"
+              style="width: 512px; height: 256px"
+              class="ml-4"
+              x-show="uploadedImage === true && showHistogram === true"
+            ></div>
+          </div>
         </div>
+
         <!-- FIM VIEWPORT -->
-        <!-- INICIO SLIDER -->
-        <div class="mt-4 text-center">
-          <label>Window Width</label>
-          <input
-            type="range"
-            min="1"
-            max="1024"
-            value="256"
-            class="slider"
-            :disabled="uploadedImage === false"
-            :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
-            id="windowWidthSlider"
-            x-model="windowWidth"
-            @input="setWindowWidth(windowWidth)"
-          />
-          Value: <span id="wws" x-text="windowWidth"></span>
-          <label>Window Center</label>
-          <input
-            type="range"
-            min="1"
-            max="768"
-            value="128"
-            class="slider"
-            :disabled="uploadedImage === false"
-            :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
-            id="windowCenterSlider"
-            x-model="windowCenter"
-            @input="setWindowCenter(windowCenter)"
-          />
-          Value: <span id="wcs" x-text="windowCenter"></span>
-        </div>
-        <!-- FIM SLIDER -->
       </div>
       <!-- INICIO BOTOES -->
       <div
@@ -284,12 +284,32 @@
   <!-- CornerstoneWADOImageLoader library -->
   <script src="cornerstone-lib/cornerstoneWADOImageLoader.js"></script>
 
+  <!-- Para gestos (Nao consegui fazer funcionar sem ela)-->
+  <script src="https://unpkg.com/hammerjs@2.0.8/hammer.js"></script>
+
+  <!--Para fazer o cornerstoneTools funcionar corretamente-->
+  <script src="https://unpkg.com/cornerstone-core"></script>
+  <script src="https://unpkg.com/cornerstone-math"></script>
+
+  <!-- CornerstoneTools-->
+  <script src="https://unpkg.com/cornerstone-tools@%5E4"></script>
+
+  <!-- Plotly para o histograma -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
   <!-- BIBLIOTECAS -->
 
   <!-- A PARTIR DAQUI VEM A PARTE QUE REALMENTE IMPORTA -->
   <script>
-    //FAZENDO A CORNERSTONERWADO CARREGAR A CORNERSTONE
+    //INSTANCIANDO AS VARIAVEIS
     cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
+    cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
+    cornerstoneTools.external.cornerstone = cornerstone;
+    cornerstoneTools.external.Hammer = Hammer;
+    //INICIALIZANDO A CORNERSTONETOOLS
+    cornerstoneTools.init({
+      showSVGCursors: true,
+    });
 
     // FUNCAO QUE (BASEADA NO EXEMPLO, PODENDO MUDAR O NOME DO ELEMENTO) HABILITA O ELEMENTO
     // DA IMAGEM PARA QUE POSSA SER ACESSADO PELA BIBLIOTECA E SER VISUALIZADO
@@ -324,6 +344,21 @@
             image
           );
           cornerstone.displayImage(element, image, viewport);
+          //ADICIONANDO O MOUSEWHEEL ASSIM QUE ELE CARREGA A IMAGEM
+          const ZoomMouseWheelTool = cornerstoneTools.ZoomMouseWheelTool;
+          cornerstoneTools.addTool(ZoomMouseWheelTool);
+          cornerstoneTools.setToolActive("ZoomMouseWheel", {
+            mouseButtonMask: 1,
+          });
+
+          /*ADICIONANDO UMA LUPA NO BOTAO DO MEIO DO MOUSE  
+        
+        DESATIVADO POR BUGS DO VIEWPORT
+        const MagnifyTool = cornerstoneTools.MagnifyTool;
+        cornerstoneTools.addTool(MagnifyTool);
+        cornerstoneTools.setToolActive('Magnify', { mouseButtonMask: 4 });
+        
+        */
         },
         function (err) {
           alert(err);
@@ -333,21 +368,65 @@
 
     // FIM FUNÇÕES UPLOAD
 
-    function setWindowWidth(value) {
-      let viewport = cornerstone.getViewport(element);
-      // PARTE REALMENTE RESPONSAVEL PELO WINDOWING //
-      viewport.voi.windowWidth = parseFloat(value);
-      cornerstone.setViewport(element, viewport);
-    }
-
-    function setWindowCenter(value) {
-      let viewport = cornerstone.getViewport(element);
-      // PARTE REALMENTE RESPONSAVEL PELO WINDOWING //
-      viewport.voi.windowCenter = parseFloat(value);
-      cornerstone.setViewport(element, viewport);
-    }
-
     // TODAS AS FUNÇÕES DOS BOTÕES BÁSICOS (MENU SUPERIOR)
+
+    //DEIXANDO AS CONSTANTES DE FORA PARA PODER IMPEDIR CONFLITOS ENTRE AS FUNCOES
+    const WwwcTool = cornerstoneTools.WwwcTool;
+    const WwwcRegionTool = cornerstoneTools.WwwcRegionTool;
+    const PanTool = cornerstoneTools.PanTool;
+
+    //VARIAVEL DE CONTROLE
+    var wwwc_bool = false;
+    var wwwcRegion_bool = false;
+    var pan_bool = false;
+
+    //FUNCAO DE WWWC NORMAL
+    function wwwcTools() {
+      if (wwwc_bool == false) {
+        pan_bool = false;
+        wwwcRegion_bool = false;
+        wwwc_bool = true;
+        cornerstoneTools.removeTool("WwwcRegion");
+        cornerstoneTools.removeTool("Pan");
+        cornerstoneTools.addTool(WwwcTool);
+        cornerstoneTools.setToolActive("Wwwc", { mouseButtonMask: 1 });
+      } else {
+        wwwc_bool = false;
+        cornerstoneTools.setToolPassive("Wwwc", { mouseButtonMask: 1 });
+      }
+    }
+
+    //FUNCAO DE WWWC A PARTIR DE UMA REGIAO
+    function wwwcRegionTools() {
+      if (wwwcRegion_bool == false) {
+        pan_bool = false;
+        wwwc_bool = false;
+        wwwcRegion_bool = true;
+        cornerstoneTools.removeTool("Wwwc");
+        cornerstoneTools.removeTool("Pan");
+        cornerstoneTools.addTool(WwwcRegionTool);
+        cornerstoneTools.setToolActive("WwwcRegion", { mouseButtonMask: 1 });
+      } else {
+        wwwcRegion_bool = false;
+        cornerstoneTools.setToolPassive("WwwcRegion", { mouseButtonMask: 1 });
+      }
+    }
+
+    // FUNCAO RESPONSAVEL POR MOVER A IMAGEM (PAN)
+    function pan() {
+      if (pan_bool == false) {
+        pan_bool = true;
+        wwwc_bool = false;
+        wwwcRegion_bool = false;
+        cornerstoneTools.removeTool("Wwwc");
+        cornerstoneTools.removeTool("WwwcRegion");
+        cornerstoneTools.addTool(PanTool);
+        cornerstoneTools.setToolActive("Pan", { mouseButtonMask: 1 });
+      } else {
+        pan_bool = false;
+        cornerstoneTools.setToolPassive("Pan", { mouseButtonMask: 1 });
+      }
+    }
 
     function invertColors() {
       let viewport = cornerstone.getViewport(element);
@@ -362,22 +441,6 @@
       // PARTE REALMENTE RESPONSAVEL PELA INTERPOLACAO //
       viewport.pixelReplication = !viewport.pixelReplication;
       // PARTE REALMENTE RESPONSAVEL PELA INTERPOLACAO //
-      cornerstone.setViewport(element, viewport);
-    }
-
-    function zoomIn() {
-      const viewport = cornerstone.getViewport(element);
-      // PARTE REALMENTE RESPONSAVEL PELO ZOOM //
-      viewport.scale += 0.25;
-      // PARTE REALMENTE RESPONSAVEL PELO ZOOM //
-      cornerstone.setViewport(element, viewport);
-    }
-
-    function zoomOut() {
-      const viewport = cornerstone.getViewport(element);
-      // PARTE REALMENTE RESPONSAVEL POR REMOVER O ZOOM //
-      viewport.scale -= 0.25;
-      // PARTE REALMENTE RESPONSAVEL POR REMOVER O ZOOM //
       cornerstone.setViewport(element, viewport);
     }
 
@@ -409,34 +472,25 @@
       cornerstone.reset(element);
     }
 
+    //FUNCAO RESPONSAVEL PELO HISTOGRAMA UTILIZANDO A BIBLIOTECA PLOTLY
+    function histogram() {
+      let viewport = cornerstone.getViewport(element);
+      // FUTURAMENTE PARAMETRIZAR A FUNCAO
+      let hist = cornerstone.getStoredPixels(element, 0, 0, 512, 512);
+
+      var data = [
+        {
+          x: hist,
+          type: "histogram",
+          histnorm: "probability",
+          marker: {
+            color: "rgb(0,0,0)",
+          },
+        },
+      ];
+      Plotly.newPlot("histograma", data);
+    }
+
     // FIM FUNÇÕES BUTÕES BÁSICOS
-
-    // FUNCAO RESPONSAVEL POR PEGAR UMA ENTRADA DO MOUSE E MOVER A IMAGEM (PAN)
-    element.addEventListener("mousedown", function (e) {
-      let lastX = e.pageX;
-      let lastY = e.pageY;
-
-      function mouseMoveHandler(e) {
-        const deltaX = e.pageX - lastX;
-        const deltaY = e.pageY - lastY;
-        lastX = e.pageX;
-        lastY = e.pageY;
-
-        const viewport = cornerstone.getViewport(element);
-        // PARTE REALMENTE RESPONSAVEL POR MOVER A IMAGEM //
-        viewport.translation.x += deltaX / viewport.scale;
-        viewport.translation.y += deltaY / viewport.scale;
-        // PARTE REALMENTE RESPONSAVEL POR MOVER A IMAGEM //
-        cornerstone.setViewport(element, viewport);
-      }
-
-      function mouseUpHandler() {
-        document.removeEventListener("mousemove", mouseMoveHandler);
-        document.removeEventListener("mouseup", mouseUpHandler);
-      }
-
-      document.addEventListener("mousemove", mouseMoveHandler);
-      document.addEventListener("mouseup", mouseUpHandler);
-    });
   </script>
 </html>
