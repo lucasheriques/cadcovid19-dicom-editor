@@ -31,10 +31,6 @@
         display: none;
       }
     </style>
-    <link
-      href="node_modules/cornerstone-core/dist/cornerstone.min.css"
-      rel="stylesheet"
-    />
     <script
       src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"
       defer
@@ -47,7 +43,7 @@
     <div
       id="mainContainer"
       class="min-h-screen flex flex-col bg-gray-900 text-white"
-      x-data="{ uploadedImage: false, interpolationStatus: false, windowWidth: 256, windowCenter: 128, showHistogram: false }"
+      x-data="{ uploadedImage: false, interpolationStatus: false, windowWidth: 256, windowCenter: 128, showHistogram: false, wwwc: false, wwwc_region: false, pan: false }"
     >
       <div
         id="title"
@@ -61,9 +57,9 @@
           id="pan"
           type="button"
           :disabled="uploadedImage === false"
-          :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
-          class="flex-1 justify-center inline-flex items-center px-3 py-2 border border-black text-sm leading-4 font-medium text-white bg-gray-600 hover:bg-gray-500 focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700 transition ease-in-out duration-150"
-          @click="pan()"
+          :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false, 'bg-gray-600 hover:bg-gray-500 focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700': pan === false, 'bg-teal-900 hover:bg-teal-800': pan }"
+          class="flex-1 justify-center inline-flex items-center px-3 py-2 border border-black text-sm leading-4 font-medium text-white transition ease-in-out duration-150"
+          @click="panTools(); wwwc = false; wwwc_region = false; pan = true"
         >
           <i class="material-icons text-md mr-2">pan_tool</i>
           Pan
@@ -72,9 +68,9 @@
           id="wwwcTool"
           type="button"
           :disabled="uploadedImage === false"
-          :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
-          class="flex-1 justify-center inline-flex items-center px-3 py-2 border border-black text-sm leading-4 font-medium text-white bg-gray-600 hover:bg-gray-500 focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700 transition ease-in-out duration-150"
-          @click="wwwcTools()"
+          :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false, 'bg-gray-600 hover:bg-gray-500 focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700': wwwc === false, 'bg-teal-900 hover:bg-teal-800': wwwc }"
+          class="flex-1 justify-center inline-flex items-center px-3 py-2 border border-black text-sm leading-4 font-medium text-white transition ease-in-out duration-150"
+          @click="wwwcTools(); wwwc = true; wwwc_region = false; pan = false"
         >
           <i class="material-icons text-md mr-2">filter_b_and_w</i>
           WWWC
@@ -83,9 +79,9 @@
           id="wwwcRegion"
           type="button"
           :disabled="uploadedImage === false"
-          :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false }"
-          class="flex-1 justify-center inline-flex items-center px-3 py-2 border border-black text-sm leading-4 font-medium text-white bg-gray-600 hover:bg-gray-500 focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700 transition ease-in-out duration-150"
-          @click="wwwcRegionTools()"
+          :class="{ 'opacity-25 cursor-not-allowed': uploadedImage === false, 'bg-gray-600 hover:bg-gray-500 focus:outline-none focus:border-gray-700 focus:shadow-outline-gray active:bg-gray-700': wwwc_region === false, 'bg-teal-900 hover:bg-teal-800': wwwc_region }"
+          class="flex-1 justify-center inline-flex items-center px-3 py-2 border border-black text-sm leading-4 font-medium text-white transition ease-in-out duration-150"
+          @click="wwwcRegionTools(); wwwc = false; wwwc_region = true; pan = false"
         >
           <i class="material-icons text-md mr-2">filter_b_and_w</i>
           WWWCRegion
@@ -167,7 +163,7 @@
           @click="histogram(); showHistogram = !showHistogram"
         >
           <i class="material-icons text-md mr-2">analytics</i>
-          Histograma
+          Histogram
         </button>
       </div>
       <div
@@ -254,8 +250,7 @@
         class="py-4 text-center"
         style="background-color: #1d1d1d"
       >
-        WIP: Anotations Tools (vamos colocar as ferramentas de anotações ainda,
-        talvez aqui, em um dropdown)
+        WIP: Segmentation and Anotations Tools
       </div>
       <footer
         class="py-2 text-center text-gray-400 text-xs"
@@ -413,7 +408,7 @@
     }
 
     // FUNCAO RESPONSAVEL POR MOVER A IMAGEM (PAN)
-    function pan() {
+    function panTools() {
       if (pan_bool == false) {
         pan_bool = true;
         wwwc_bool = false;
